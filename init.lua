@@ -803,20 +803,20 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    'metalelf0/black-metal-theme-neovim',
+    lazy = false,
     priority = 1000, -- Make sure to load this before all the other start plugins.
+
     config = function()
       ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
+      require('black-metal').setup {
+        theme = 'dark-funeral',
+        colored_docstrings = false,
       }
 
       -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
+      require('black-metal').load()
     end,
   },
 
@@ -947,6 +947,39 @@ require('lazy').setup({
     },
   },
 })
+
+local function pipe_to_hx_snippet(mode)
+  local buf_name = vim.fn.expand '%:p'
+  local lang = vim.bo.filetype
+
+  local line_start, line_end
+  local lines = {}
+
+  if mode == 'v' then
+    local v_start = vim.fn.line 'v'
+    local v_end = vim.fn.line '.'
+    line_start = math.min(v_start, v_end)
+    line_end = math.max(v_start, v_end)
+    lines = { vim.fn.getline(line_start, line_end) }
+  else
+    line_start = vim.fn.line '.'
+    line_end = line_start
+    lines = { vim.fn.getline '.' }
+  end
+
+  local text_to_pipe = table.concat(lines, '\n') .. '\n'
+  local cmd = string.format('hx-snippet %s %d %d %s', vim.fn.shellescape(buf_name), line_start, line_end, vim.fn.shellescape(lang))
+
+  vim.fn.system(cmd, text_to_pipe)
+
+  if vim.v.shell_error ~= 0 then
+    vim.notify('Error running hx-snippet', vim.log.levels.ERROR)
+  else
+    vim.notify('Piped to hx-snippet!', vim.log.levels.INFO)
+  end
+end
+
+vim.keymap.set({ 'n', 'v' }, '<leader>ay', function() pipe_to_hx_snippet(vim.fn.mode()) end, { desc = '[A]i [Y]ank' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
