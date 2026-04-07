@@ -139,6 +139,14 @@ vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
 
+-- Soft wrap settings to match Helix behavior
+-- See :help wrap, :help linebreak, :help showbreak, :help breakindent
+vim.o.wrap = true
+vim.o.linebreak = true      -- Wrap at word boundaries (not mid-word)
+vim.o.breakindent = true    -- Preserve indentation on wrapped lines
+vim.o.showbreak = '↪ '      -- Clear visual indicator for soft-wrapped lines (your preference)
+vim.opt.breakindentopt = { 'shift:2', 'sbr' }  -- Indent wrapped lines + show showbreak char
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
@@ -148,7 +156,7 @@ vim.o.splitbelow = true
 --   See `:help lua-options`
 --   and `:help lua-guide-options`
 vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', extends = '›', precedes = '‹' }
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
@@ -197,11 +205,21 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- Helix-like soft wrap navigation: j/k follow visual lines (display lines)
+-- This gives you the Helix experience where j/k respect soft wraps.
+-- Use gj/gk when you specifically want logical (file) line movement.
+vim.keymap.set({ 'n', 'x' }, 'j', 'gj', { desc = 'Move down (visual line - Helix style)' })
+vim.keymap.set({ 'n', 'x' }, 'k', 'gk', { desc = 'Move up (visual line - Helix style)' })
+vim.keymap.set({ 'n', 'x' }, 'gj', 'j', { desc = 'Move down (logical line)' })
+vim.keymap.set({ 'n', 'x' }, 'gk', 'k', { desc = 'Move up (logical line)' })
+
+-- Also map arrow keys for consistency
+vim.keymap.set({ 'n', 'x' }, '<Down>', 'gj', { desc = 'Move down (visual line)' })
+vim.keymap.set({ 'n', 'x' }, '<Up>', 'gk', { desc = 'Move up (visual line)' })
+
+-- Insert mode mappings (so you get the same behavior while typing)
+vim.keymap.set('i', '<Down>', '<C-o>gj', { desc = 'Move down (visual line)' })
+vim.keymap.set('i', '<Up>', '<C-o>gk', { desc = 'Move up (visual line)' })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
