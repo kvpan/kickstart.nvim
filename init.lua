@@ -481,6 +481,11 @@ require('lazy').setup({
 
   -- LSP Plugins
   {
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {},
+  },
+  {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -874,7 +879,7 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'scheme', 'vim', 'vimdoc' }
       require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
@@ -920,7 +925,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -955,12 +960,14 @@ local function pipe_to_hx_snippet(mode)
   local line_start, line_end
   local lines = {}
 
-  if mode == 'v' then
-    local v_start = vim.fn.line 'v'
-    local v_end = vim.fn.line '.'
-    line_start = math.min(v_start, v_end)
-    line_end = math.max(v_start, v_end)
-    lines = { vim.fn.getline(line_start, line_end) }
+  if mode == 'v' or mode == 'V' or mode == '\22' then
+    -- Reselect visual mode to set the '< and '> marks, then get the positions
+    vim.cmd 'normal! gv'
+    line_start = vim.fn.line "'<'"
+    line_end = vim.fn.line "'>'"
+    lines = vim.fn.getline(line_start, line_end)
+    -- Ensure lines is always a table (getline returns string when start == end)
+    if type(lines) == 'string' then lines = { lines } end
   else
     line_start = vim.fn.line '.'
     line_end = line_start
@@ -979,7 +986,50 @@ local function pipe_to_hx_snippet(mode)
   end
 end
 
-vim.keymap.set({ 'n', 'v' }, '<leader>ay', function() pipe_to_hx_snippet(vim.fn.mode()) end, { desc = '[A]i [Y]ank' })
+vim.keymap.set({ 'n', 'v' }, '<leader>ay', function() pipe_to_hx_snippet(vim.fn.mode()) end, { desc = '[A]I [Y]ank' })
+
+-- Native implementation that copies snippet directly to clipboard without shell script
+local function copy_snippet_native()
+  local buf_name = vim.fn.expand '%:p'
+  local lang = vim.bo.filetype
+
+  -- Get visual selection range from marks
+  local line_start = vim.fn.line "'<'"
+  local line_end = vim.fn.line "'>'"
+
+  -- If marks aren't valid (0 or -1), use current line
+  if line_start <= 0 or line_end <= 0 then
+    line_start = vim.fn.line '.'
+    line_end = line_start
+  end
+
+  -- Ensure start <= end
+  if line_start > line_end then
+    line_start, line_end = line_end, line_start
+  end
+
+  local lines = vim.fn.getline(line_start, line_end)
+
+  -- Ensure lines is a table
+  if type(lines) == 'string' then lines = { lines } end
+
+  local content = table.concat(lines, '\n')
+  local snippet = string.format('File: %s:%d-%d\n```%s\n%s\n```', buf_name, line_start, line_end, lang, content)
+
+  -- Copy to system clipboard and unnamed register
+  vim.fn.setreg('+', snippet)
+  vim.fn.setreg('"', snippet)
+
+  vim.notify('Snippet copied to clipboard!', vim.log.levels.INFO)
+end
+
+vim.keymap.set('n', '<leader>an', copy_snippet_native, { desc = '[A]I [N]ative yank' })
+vim.keymap.set('v', '<leader>an', function()
+  -- Exit visual to set marks, then run
+  local esc = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+  vim.api.nvim_feedkeys(esc, 'x', false)
+  vim.schedule(copy_snippet_native)
+end, { desc = '[A]I [N]ative yank' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
