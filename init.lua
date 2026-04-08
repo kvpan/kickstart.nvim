@@ -675,7 +675,8 @@ require('lazy').setup({
       -- You can press `g?` for help in this menu.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
+        -- Formatters (will be installed by mason-tool-installer)
+        'prettier', -- Used for markdown (and other formats)
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -719,6 +720,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        markdown = { 'prettier' }, -- Auto-format markdown on save (Helix-like experience)
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
