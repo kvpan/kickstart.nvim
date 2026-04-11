@@ -98,12 +98,6 @@ vim.g.have_nerd_font = false
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
-vim.o.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
-
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
 
@@ -125,9 +119,6 @@ vim.o.undofile = true
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.ignorecase = true
 vim.o.smartcase = true
-
--- Keep signcolumn on by default
-vim.o.signcolumn = 'yes'
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -164,7 +155,6 @@ vim.o.inccommand = 'split'
 -- Show which line your cursor is on
 vim.o.cursorline = true
 
--- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
 
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
@@ -291,7 +281,7 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  { -- Git signs and utilities for managing changes
     'lewis6991/gitsigns.nvim',
     ---@module 'gitsigns'
     ---@type Gitsigns.Config
@@ -336,7 +326,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
