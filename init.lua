@@ -666,6 +666,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         -- Formatters (will be installed by mason-tool-installer)
+        'typescript-language-server', -- Provides tsserver for typescript-tools.nvim
         'prettier', -- Used for markdown (and other formats)
       })
 
