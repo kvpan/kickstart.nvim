@@ -120,6 +120,10 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+-- Keep signcolumn on by default so git signs (and other gutter indicators) are visible
+-- even when line numbers are disabled
+vim.o.signcolumn = 'yes'
+
 -- Decrease update time
 vim.o.updatetime = 250
 
@@ -937,6 +941,8 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
+  -- Load the full gitsigns config (includes recommended keymaps and on_attach)
+  { import = 'kickstart.plugins.gitsigns' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
