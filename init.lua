@@ -137,10 +137,10 @@ vim.o.splitbelow = true
 -- Soft wrap settings to match Helix behavior
 -- See :help wrap, :help linebreak, :help showbreak, :help breakindent
 vim.o.wrap = true
-vim.o.linebreak = true      -- Wrap at word boundaries (not mid-word)
-vim.o.breakindent = true    -- Preserve indentation on wrapped lines
-vim.o.showbreak = '↪ '      -- Clear visual indicator for soft-wrapped lines (your preference)
-vim.opt.breakindentopt = { 'shift:2', 'sbr' }  -- Indent wrapped lines + show showbreak char
+vim.o.linebreak = true -- Wrap at word boundaries (not mid-word)
+vim.o.breakindent = true -- Preserve indentation on wrapped lines
+vim.o.showbreak = '↪ ' -- Clear visual indicator for soft-wrapped lines (your preference)
+vim.opt.breakindentopt = { 'shift:2', 'sbr' } -- Indent wrapped lines + show showbreak char
 
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
@@ -618,7 +618,7 @@ require('lazy').setup({
       ---@type table<string, vim.lsp.Config>
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         --
@@ -673,6 +673,7 @@ require('lazy').setup({
         -- Formatters (will be installed by mason-tool-installer)
         'typescript-language-server', -- Provides tsserver for typescript-tools.nvim
         'prettier', -- Used for markdown (and other formats)
+        'goimports', -- Go import organizer + formatter
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -718,6 +719,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         markdown = { 'prettier' }, -- Auto-format markdown on save (Helix-like experience)
         zig = { 'zigfmt' },
+        go = { 'goimports', 'gofmt', stop_after_first = true },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -819,27 +821,31 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-
+  {
+    'nikolvs/vim-sunbather',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme 'sunbather'
+      vim.o.background = 'light'
+    end,
+  },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'metalelf0/black-metal-theme-neovim',
-    lazy = false,
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('black-metal').setup {
-        theme = 'dark-funeral',
-        colored_docstrings = false,
-      }
-
-      -- Load the colorscheme here.
-      -- vim.cmd.colorscheme 'tokyonight-night'
-      require('black-metal').load()
-    end,
+    -- 'metalelf0/black-metal-theme-neovim',
+    -- config = function()
+    --   require('black-metal').setup {
+    --     theme = 'immortal',
+    --     colored_docstrings = false,
+    --   }
+    --
+    --   -- Load the colorscheme here.
+    --   -- vim.cmd.colorscheme 'tokyonight-night'
+    --   -- require('black-metal').load()
+    -- end,
   },
 
   -- Highlight todo, notes, etc in comments
@@ -896,7 +902,7 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'scheme', 'vim', 'vimdoc', 'zig' }
+      local parsers = { 'bash', 'c', 'diff', 'go', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'scheme', 'vim', 'vimdoc', 'zig' }
       require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
